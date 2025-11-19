@@ -29,10 +29,15 @@ export function clearScreenAndRedraw(chatMessages: ChatMessage[]): void {
     if (msg.role === 'user') {
       console.log(colors.blue('User: ') + msg.content);
     } else if (msg.role === 'assistant') {
-      console.log(colors.green('Assistant: ') + renderMarkdown(msg.content));
+      // Check if this is a tool execution message (starts with emoji)
+      const isToolMessage = msg.content.startsWith('🔧') || msg.content.startsWith('📄') || msg.content.includes('Using tool:') || msg.content.includes('Tool result:');
+      if (isToolMessage) {
+        console.log(msg.content);
+      } else {
+        console.log(colors.green('Assistant: ') + renderMarkdown(msg.content));
+      }
     } else if (msg.role === 'tool') {
       console.log(colors.yellow('Tool: ') + msg.content);
     }
   });
-
 }

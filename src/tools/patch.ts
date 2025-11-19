@@ -39,8 +39,11 @@ function createBackup(filePath: string): string {
 }
 
 function validatePatchChange(change: PatchChange, totalLines: number): string | null {
-  if (change.lineStart < 1 || change.lineStart > totalLines + 1) {
-    return `Invalid lineStart: ${change.lineStart}. Must be between 1 and ${totalLines + 1}`;
+  // Adjust validation for empty files (totalLines = 0)
+  const maxLine = totalLines === 0 ? 1 : totalLines + 1;
+  
+  if (change.lineStart < 1 || change.lineStart > maxLine) {
+    return `Invalid lineStart: ${change.lineStart}. Must be between 1 and ${maxLine}`;
   }
 
   if (change.action === 'replace' || change.action === 'delete') {
@@ -68,6 +71,15 @@ function validatePatchChange(change: PatchChange, totalLines: number): string | 
 
 function applyPatchChanges(lines: string[], changes: PatchChange[]): { success: boolean; failedChanges: PatchChange[] } {
   const failedChanges: PatchChange[] = [];
+
+  // Validate that changes don't overlap before applying
+  const validationError = validateNoOverlappingChanges(changes, lines.length);
+  if (validationError) {
+    return {
+      success: false,
+      failedChanges: changes
+    };
+  }
 
   // Sort changes by line number in reverse order to avoid index shifting issues
   const sortedChanges = [...changes].sort((a, b) => b.lineStart - a.lineStart);
@@ -102,6 +114,43 @@ function applyPatchChanges(lines: string[], changes: PatchChange[]): { success: 
     success: failedChanges.length === 0,
     failedChanges
   };
+}
+
+function validateNoOverlappingChanges(changes: PatchChange[], totalLines: number): string | null {
+  // Check for overlapping changes
+  for (let i = 0; i < changes.length; i++) {
+    const change1 = changes[i];
+    
+    // Validate each change individually first
+    const individualError = validatePatchChange(change1, totalLines);
+    if (individualError) {
+      return `Change ${i + 1} validation failed: ${individualError}`;
+    }
+    
+    for (let j = i + 1; j < changes.length; j++) {
+      const change2 = changes[j];
+      
+      // Skip if they're the same operation
+      if (change1 === change2) continue;
+      
+      // Determine ranges for both changes
+      let range1Start = change1.lineStart;
+      let range1End = change1.lineEnd || change1.lineStart;
+      let range2Start = change2.lineStart;
+      let range2End = change2.lineEnd || change2.lineStart;
+      
+      // Ensure start <= end
+      if (range1Start > range1End) [range1Start, range1End] = [range1End, range1Start];
+      if (range2Start > range2End) [range2Start, range2End] = [range2End, range2Start];
+      
+      // Check for overlap
+      if (range1End >= range2Start && range2End >= range1Start) {
+        return `Changes overlap: Change ${i + 1} (lines ${range1Start}-${range1End}) and Change ${j + 1} (lines ${range2Start}-${range2End})`;
+      }
+    }
+  }
+  
+  return null;
 }
 
 export async function patchFile(request: PatchRequest): Promise<PatchResult> {
