@@ -15,7 +15,6 @@ import { estimateTotalTokens } from './src/utils/tokenCounter.js';
 
 let messageHistory: ChatMessage[] = [];
 let chatMessages: ChatMessage[] = [];
-let mockMode = false;
 
 async function makeAPICall(abortSignal?: AbortSignal): Promise<string | undefined> {
   const message = await makeAPIRequest(messageHistory, getToolDefinitions(), abortSignal);
@@ -33,7 +32,7 @@ async function makeAPICall(abortSignal?: AbortSignal): Promise<string | undefine
         role: 'assistant',
         content: content
       });
-      clearScreenAndRedraw(chatMessages, mockMode);
+      clearScreenAndRedraw(chatMessages);
     }
 
     for (const toolCall of tool_calls) {
@@ -41,7 +40,7 @@ async function makeAPICall(abortSignal?: AbortSignal): Promise<string | undefine
         role: 'assistant',
         content: `🔧 Using tool: ${toolCall.function.name}`
       });
-      clearScreenAndRedraw(chatMessages, mockMode);
+      clearScreenAndRedraw(chatMessages);
 
       const result = await executeTool(toolCall);
 
@@ -55,7 +54,7 @@ async function makeAPICall(abortSignal?: AbortSignal): Promise<string | undefine
         role: 'assistant',
         content: `📄 Tool result: ${result.substring(0, 300)}${result.length > 300 ? '...' : ''}`
       });
-      clearScreenAndRedraw(chatMessages, mockMode);
+      clearScreenAndRedraw(chatMessages);
     }
 
     return await makeAPICall(abortSignal);
@@ -89,7 +88,7 @@ async function main(): Promise<void> {
       content: systemPrompt
     });
 
-    clearScreenAndRedraw(chatMessages, mockMode);
+    clearScreenAndRedraw(chatMessages);
     console.log(colors.gray('Connected! Start chatting below. Type "exit" to quit or "/help" for commands.\n'));
 
     while (true) {
@@ -163,7 +162,7 @@ async function main(): Promise<void> {
             });
           }
 
-          clearScreenAndRedraw(chatMessages, mockMode);
+      clearScreenAndRedraw(chatMessages);
 
           if (commandResult.shouldContinue) {
             continue;
@@ -178,7 +177,7 @@ async function main(): Promise<void> {
         content: message
       });
 
-      clearScreenAndRedraw(chatMessages, mockMode);
+      clearScreenAndRedraw(chatMessages);
 
       const spinner = ora('AI is thinking... (Press ESC to cancel)').start();
 
@@ -232,7 +231,7 @@ async function main(): Promise<void> {
         process.stdin.removeListener('data', escapeListener);
       }
 
-      clearScreenAndRedraw(chatMessages, mockMode);
+      clearScreenAndRedraw(chatMessages);
     }
   } catch (error) {
     spinner.fail(colors.red('✗ Could not connect to AI server'));
