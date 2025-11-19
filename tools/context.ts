@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import ora from 'ora';
 
-export async function getCodeContext(filePath: string, lineNumber: string, contextLines: number = 20): Promise<string> {
+export async function getCodeContext(filePath: string, lineNumber: string, contextLines: number = 100): Promise<string> {
   const spinner = ora(`Getting context for ${filePath}:${lineNumber}...`).start();
 
   try {
