@@ -1,19 +1,15 @@
-# Makefile for Spectre AI
+# Makefile for spectre project
 
-build:
-	npm run build
+build: clean
+	npm run build:prod
+
+install: build
+	npm run install-binary
 
 clean:
-	npm run clean
+	rm -rf dist
 
-install:
-	npm install
-
-.PHONY: build clean install
-
-# Build TypeScript files
-.PHONY: build
-
+.PHONY: build install clean
 	npm run build
 
 # Bundle the application
@@ -24,22 +20,22 @@ install:
 # Install binary
 .PHONY: install-binary
 
-install-binary:	node install-binary.js
+install-binary: node install-binary.js
 
 # Test binary
 .PHONY: test-binary
 
-test-binary:	node test-binary.js
+test-binary: node test-binary.js
 
 # Run the application
 .PHONY: run
 
-run:	make build && node dist/index.js
+run: make build && node dist/index.js
 
 # Dev mode (using tsx)
 .PHONY: dev
 
-dev:	tsx index.ts
+dev: tsx index.ts
 
 # Help target
 .PHONY: help

@@ -6,12 +6,12 @@
   "main": "dist/index.js",
   "module": "dist/index.js",
   "bin": {
-    "spectre": "./dist/spectre-binary"
+    "spectre": "./dist/spectre"
   },
   "scripts": {
     "build": "tsc",
     "bundle": "node build.js",
-    "start": "npm run build && node dist/index.js",
+    "build:prod": "npm run build && npm run bundle",
     "dev": "tsx index.ts",
     "clean": "rm -rf dist",
     "postinstall": "npm run bundle",
