@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+
 
 import colors from 'yoctocolors-cjs';
 import ora from 'ora';
@@ -9,7 +9,7 @@ import { clearScreenAndRedraw } from './src/chat/interface.js';
 import { createPersistentInput } from './src/chat/input.js';
 import { executeCommand, isCommand } from './src/chat/commands.js';
 import { getToolDefinitions, executeTool } from './src/tools/manager.js';
-import { DEBUG_MODE } from './src/config/constants.js';
+import { DEBUG_MODE, CONTEXT_LIMIT } from './src/config/constants.js';
 import { ChatMessage } from './src/types/index.js';
 import { estimateTotalTokens } from './src/utils/tokenCounter.js';
 
@@ -93,7 +93,7 @@ async function main(): Promise<void> {
 
     while (true) {
       const totalTokens = estimateTotalTokens(chatMessages);
-      const TOKEN_THRESHOLD = 1500;
+      const TOKEN_THRESHOLD = CONTEXT_LIMIT;
       const message = await createPersistentInput(totalTokens > TOKEN_THRESHOLD);
 
       if (message === 'exit') {
@@ -162,7 +162,7 @@ async function main(): Promise<void> {
             });
           }
 
-      clearScreenAndRedraw(chatMessages);
+          clearScreenAndRedraw(chatMessages);
 
           if (commandResult.shouldContinue) {
             continue;
