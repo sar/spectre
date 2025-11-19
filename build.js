@@ -24,17 +24,17 @@ async function buildBinary() {
         'process.env.NODE_ENV': '"production"'
       },
       banner: {
-        js: ''
+        js: '#!/usr/bin/env node\n\n"use strict";\n'
       },
       logLevel: 'info'
     });
-
+    
     // Make it executable
-    const binaryPath = path.resolve('./dist/spectre-binary');
+    const binaryPath = path.resolve('./dist/spectre');
     if (fs.existsSync(binaryPath)) {
       fs.chmodSync(binaryPath, 0o755);
       console.log('✅ Binary built successfully as', binaryPath);
-      console.log('You can now run: spectre');
+      console.log('You can now run: ./dist/spectre');
     } else {
       console.log('❌ Binary file was not created');
       process.exit(1);
@@ -46,4 +46,3 @@ async function buildBinary() {
 }
 
 buildBinary();
-
