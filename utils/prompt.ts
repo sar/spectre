@@ -14,7 +14,7 @@ export function loadPromptTemplate(): string {
     
     const variables: PromptVariables = {
       WORKING_DIRECTORY: process.cwd(),
-      API_BASE_URL: process.env.LLAMA_API_URL || 'http://localhost:8080',
+      API_BASE_URL: process.env.LLAMA_HOST_URI || 'http://localhost:8080',
       PROJECT_NAME: path.basename(process.cwd())
     };
     

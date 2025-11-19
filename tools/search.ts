@@ -15,9 +15,9 @@ export async function searchCodebase(query: string): Promise<string> {
     try {
       await execAsync('which rg');
       useRipgrep = true;
-      command = `rg -n -C 1 --no-heading --max-count 10 --type-not log "${query}" . 2>/dev/null || true`;
+command = `rg -n -C 1 --no-heading --max-count 10 --type-not log -i "${query}" . 2>/dev/null || true`;
     } catch {
-      command = `grep -rn --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" --include="*.py" --include="*.java" --include="*.cpp" --include="*.c" --include="*.cs" --include="*.php" --include="*.rb" --include="*.go" --include="*.rs" --include="*.swift" --include="*.kt" --include="*.scala" --include="*.sh" --include="*.html" --include="*.css" --include="*.scss" --include="*.json" --include="*.md" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=build --exclude-dir=.next "${query}" . 2>/dev/null || true`;
+command = `grep -rn -i --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" --include="*.py" --include="*.java" --include="*.cpp" --include="*.c" --include="*.cs" --include="*.php" --include="*.rb" --include="*.go" --include="*.rs" --include="*.swift" --include="*.kt" --include="*.scala" --include="*.sh" --include="*.html" --include="*.css" --include="*.scss" --include="*.json" --include="*.md" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=build --exclude-dir=.next "${query}" . 2>/dev/null || true`;
     }
 
     const { stdout } = await execAsync(command);

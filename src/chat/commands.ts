@@ -6,6 +6,7 @@ export interface CommandResult {
   clearHistory?: boolean;
   clearChat?: boolean;
   summarize?: boolean;
+  save?: boolean;
   message?: string;
 }
 
@@ -65,7 +66,32 @@ const commands: Command[] = [
         message: 'Summarizing conversation...'
       };
     }
-  }
+  },
+  {
+    name: 'quit',
+    description: 'Exit the application',
+    usage: '/quit',
+    handler: () => {
+      return {
+        handled: true,
+        shouldContinue: false,
+        message: 'Goodbye!'
+      };
+    }
+  },
+  {
+    name: 'save',
+    description: 'Save current chat history to .spectre directory',
+    usage: '/save',
+    handler: () => {
+      return {
+        handled: true,
+        shouldContinue: true,
+        save: true,
+        message: 'Chat history saved to .spectre directory'
+      };
+    }
+  },
 ];
 
 export function isCommand(input: string): boolean {
