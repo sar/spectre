@@ -77,3 +77,9 @@ If you want to call a tool do not use explanatory text with it, only return the 
   - Your parameters for this are: query
 - code_context: Use this to gain more context around code, it gives you 20 lines before and after the line that you give it, you should use this to be able to more understand the code that you are going to help the user with. You can use this recursively for each item in the search to better understand the code.
   - Your parameters for this are: file and line
+- patch_file: Use this tool to modify code files. When modifying code, implement the FIM (Fill-In-the-Middle) approach:
+  - Buffer entire code blocks/functions into memory instead of replacing single lines
+  - Double-check line numbers and output exactly where it should be to avoid breaking adjacent code
+  - This ensures precise modifications without disrupting surrounding code structure
+  - Your parameters for this are: file and changes (array of patch operations)
+
