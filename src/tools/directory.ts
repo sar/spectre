@@ -36,24 +36,35 @@ function isIgnored(filePath: string, ignorePatterns: string[], basePath: string)
   const relativePath = path.relative(basePath, filePath);
   const pathParts = relativePath.split(path.sep);
 
+  // Handle special cases for root-level directories
+  const fileName = path.basename(filePath);
+
   for (const pattern of ignorePatterns) {
-    // Handle exact matches
-    if (pattern === relativePath || pattern === path.basename(filePath)) {
+    // Handle exact matches for directory names
+    if (pattern === fileName || pattern === relativePath) {
       return true;
+    }
+
+    // Handle patterns ending with / which indicate directories
+    if (pattern.endsWith('/')) {
+      const dirPattern = pattern.slice(0, -1);
+      if (dirPattern === fileName || dirPattern === relativePath) {
+        return true;
+      }
     }
 
     // Handle wildcard patterns (basic implementation)
     if (pattern.includes('*')) {
       const regexPattern = pattern
-        .replace(/\./g, '\\.')
+        .replace(/\./g, '\.')
         .replace(/\*/g, '.*');
       const regex = new RegExp(`^${regexPattern}$`);
-      if (regex.test(relativePath) || regex.test(path.basename(filePath))) {
+      if (regex.test(relativePath) || regex.test(fileName)) {
         return true;
       }
     }
 
-    // Handle directory patterns
+    // Handle directory patterns - check if any path part matches the pattern
     if (pathParts.includes(pattern)) {
       return true;
     }
@@ -84,14 +95,20 @@ function buildDirectoryTree(
 
     for (const item of items) {
       const fullPath = path.join(dirPath, item);
-      
+
       // Skip if ignored
       if (isIgnored(fullPath, ignorePatterns, basePath)) {
         continue;
       }
 
+      // Additional safeguard: check for common directories we want to exclude
+      const itemName = path.basename(fullPath);
+      if (itemName === 'node_modules' || itemName === '.git' || itemName === 'build' || itemName === 'dist') {
+        continue;
+      }
+
       const stats = fs.statSync(fullPath);
-      
+
       if (stats.isDirectory()) {
         const children = buildDirectoryTree(fullPath, ignorePatterns, basePath, currentDepth + 1, maxDepth);
         const directoryItem: DirectoryItem = {
@@ -130,7 +147,7 @@ function formatTree(items: DirectoryItem[], prefix: string = ''): string {
     const isLastItem = index === items.length - 1;
     const connector = isLastItem ? '└── ' : '├── ';
     const icon = item.type === 'directory' ? '📁 ' : '📄 ';
-    
+
     result.push(`${prefix}${connector}${icon}${item.name}`);
 
     if (item.children && item.children.length > 0) {
@@ -185,15 +202,26 @@ export async function getDirectoryStructure(options: DirectoryStructureOptions =
       ];
     }
 
+    // Ensure that common directories are always excluded
+    const alwaysIgnore = ['node_modules', '.git', 'build', 'dist', 'package-lock.json'];
+    for (const dir of alwaysIgnore) {
+      if (!ignorePatterns.includes(dir)) {
+        ignorePatterns.push(dir);
+      }
+    }
+
     const tree = buildDirectoryTree(targetPath, ignorePatterns, targetPath, 0, maxDepth);
-    
+
     if (tree.length === 0) {
       return `Directory is empty or all contents are ignored: ${targetPath}`;
     }
 
-    const header = `Directory Structure (${targetPath}):\n`;
+    const header = `Directory Structure (${targetPath}):
+`;
     const treeOutput = formatTree(tree);
-    const footer = `\n\n📊 Showing ${maxDepth} levels deep, respecting .gitignore rules`;
+    const footer = `
+
+📊 Showing ${maxDepth} levels deep, respecting .gitignore rules`;
 
     return header + treeOutput + footer;
 
