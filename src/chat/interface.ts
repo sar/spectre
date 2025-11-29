@@ -34,11 +34,7 @@ export function clearScreenAndRedraw(chatMessages: ChatMessage[]): void {
       if (isToolMessage) {
         console.log(msg.content);
       } else {
-        // Remove </function> tags and XML wrapper characters from assistant messages before rendering
-        const cleanContent = msg.content
-          .replace(/<\/function>/g, '')
-          .replace(/[\s\n]*[<tool_call>]+[\s\n]*$/gm, '');
-        console.log(colors.green('Assistant: ') + renderMarkdown(cleanContent));
+        console.log(colors.green('Assistant: ') + renderMarkdown(msg.content));
       }
     } else if (msg.role === 'tool') {
       console.log(colors.yellow('Tool: ') + msg.content);
